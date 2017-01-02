@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (!mqttClient.isConnected()){
             mqttClient.setParentActivity(this);
-            if (mqttClient.doConnect("homemate" + tvContent)){
+            if (mqttClient.doConnect("homemate" + myDeviceid)){
                 myDeviceid += ", connected to iot successfully.";
             }else{
                 myDeviceid += ", failed to connect to iot.";

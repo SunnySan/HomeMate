@@ -16,6 +16,9 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 
 public class MateMqttClient implements MqttCallback {
 
@@ -86,6 +89,7 @@ public class MateMqttClient implements MqttCallback {
     public void setParentActivity(Activity parentActivity){
         myParentActivity = parentActivity;
     }
+
     public boolean doConnect(String clientId) {
         // setup MQTT Client
         connOpt = new MqttConnectOptions();
@@ -110,6 +114,23 @@ public class MateMqttClient implements MqttCallback {
             me.printStackTrace();
             return false;
         }
+
+        // setup topic
+        // topics on m2m.io are in the form <domain>/<stuff>/<thing>
+        String myTopic = M2MIO_DOMAIN + "/" + M2MIO_STUFF + "/" + clientId;
+        System.out.println("MQTT topic= " + myTopic);
+        MqttTopic topic = myClient.getTopic(myTopic);
+
+        // subscribe to topic
+        try {
+            int subQoS = 0;
+            myClient.subscribe(myTopic, subQoS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            doDisconnect();
+            return false;
+        }
+
         return true;
     }
 
@@ -207,10 +228,31 @@ public class MateMqttClient implements MqttCallback {
         System.out.println("| Topic:" + topic);
         System.out.println("| Message: " + new String(message.getPayload()));
         System.out.println("-------------------------------------------------");
-        //啟動播放video的Activity，並將影片資訊帶過去給Activity
-        Intent intent = new Intent(myParentActivity, MainActivity.class);
-        intent.putExtra("url", message.getPayload());
-        myParentActivity.startActivity(intent);
-    }
+        JSONParser parser = new JSONParser();
+        try{
+            String sPayload = new String(message.getPayload());
+            System.out.println("payload= " + sPayload);
+            JSONObject jsonObject = (JSONObject) parser.parse(sPayload);
+            String sAction = (String) jsonObject.get("action");
+            System.out.println("action= " + sAction);
+            if (sAction.equals("video")){
+                String sVideoType = (String) jsonObject.get("video_type");  //影片類型
+                System.out.println("video_type= " + sVideoType);
+                String sVideoId = (String) jsonObject.get("video_id");  //影片 id
+                System.out.println("video_id= " + sVideoId);
+                //啟動播放video的Activity，並將影片資訊帶過去給Activity
+                Intent intent = null;
+                if (sVideoType.equals("youtube")){  //YouTube影片
+                    intent = new Intent(myParentActivity, YouTubePlayerActivity.class);
+                }else{  //內部影片
+                    intent = new Intent(myParentActivity, PrefActivity.class);
+                }
+                intent.putExtra("videoId", sVideoId);
+                myParentActivity.startActivity(intent);
+            }   //if (sAction.equals("video")){
+        } catch (Exception e) {
+            e.printStackTrace();
+        }   //try{
+    }   //public void messageArrived(String topic, MqttMessage message) throws Exception {
 
 }

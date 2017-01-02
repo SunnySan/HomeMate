@@ -30,8 +30,10 @@
         </activity>
 
         <!-- 設定元件 -->
-        <activity
-            android:name=".PrefActivity" />
+        <activity android:name=".PrefActivity" />
+        <activity android:name=".YouTubePlayerActivity"
+            android:screenOrientation="landscape">
+        </activity>
     </application>
 
 </manifest>
