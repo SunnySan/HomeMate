@@ -1,6 +1,7 @@
 package com.sunny.homemate;
 
 import android.annotation.SuppressLint;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,7 +17,7 @@ import android.widget.VideoView;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class VideoPlayerActivity extends AppCompatActivity {
+public class VideoPlayerActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -173,13 +174,24 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private void playVideo(){
         VideoView videoView = (VideoView) this.findViewById(R.id.videoView);
 
+        videoView.setOnCompletionListener(this);    //播放完畢後的處理
+
+        //全螢幕播放
+        videoView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+/*
         DisplayMetrics metrics = new DisplayMetrics(); getWindowManager().getDefaultDisplay().getMetrics(metrics);
         android.widget.LinearLayout.LayoutParams params = (android.widget.LinearLayout.LayoutParams) videoView.getLayoutParams();
         params.width =  metrics.widthPixels;
         params.height = metrics.heightPixels;
         params.leftMargin = 0;
         videoView.setLayoutParams(params);
-
+*/
         MediaController mc = new MediaController(this);
         videoView.setMediaController(mc);
         videoView.setVideoURI(Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.miku2));
@@ -187,4 +199,10 @@ public class VideoPlayerActivity extends AppCompatActivity {
         videoView.requestFocus();
         videoView.start();
     }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {  //播放完後就結束 Activity
+        this.finish();
+    }
+
 }

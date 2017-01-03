@@ -231,6 +231,14 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        if (mqttClient.isConnected()) mqttClient.doDisconnect();
+        if (isTTSLoaded) textToSpeech.shutdown();
+    }
+
     // 載入選單資源 Menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
