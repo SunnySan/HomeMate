@@ -35,7 +35,7 @@
             android:name=".YouTubePlayerActivity"
             android:screenOrientation="landscape"></activity>
         <activity
-            android:name=".VideoPlayer"
+            android:name=".VideoPlayerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_video_player"
             android:screenOrientation="landscape"

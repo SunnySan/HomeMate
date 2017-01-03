@@ -254,7 +254,7 @@ public class MateMqttClient implements MqttCallback {
                 if (sVideoType.equals("youtube")){  //YouTube影片
                     intent = new Intent(myParentActivity, YouTubePlayerActivity.class);
                 }else{  //內部影片
-                    intent = new Intent(myParentActivity, PrefActivity.class);
+                    intent = new Intent(myParentActivity, VideoPlayerActivity.class);
                 }
                 intent.putExtra("videoId", sVideoId);
                 intent.putExtra("screenSize", sScreenSize);
