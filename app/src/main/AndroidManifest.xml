@@ -31,9 +31,15 @@
 
         <!-- 設定元件 -->
         <activity android:name=".PrefActivity" />
-        <activity android:name=".YouTubePlayerActivity"
-            android:screenOrientation="landscape">
-        </activity>
+        <activity
+            android:name=".YouTubePlayerActivity"
+            android:screenOrientation="landscape"></activity>
+        <activity
+            android:name=".VideoPlayer"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_video_player"
+            android:screenOrientation="landscape"
+            android:theme="@style/FullscreenTheme"></activity>
     </application>
 
 </manifest>

@@ -1,18 +1,19 @@
 package com.sunny.homemate;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
-import com.google.android.youtube.player.YouTubePlayerView;
 import com.google.android.youtube.player.YouTubePlayer.PlaybackEventListener;
 import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener;
+import com.google.android.youtube.player.YouTubePlayerView;
+
+import static com.sunny.homemate.Config.GC_YOUTUBE_API_KEY;
 
 public class YouTubePlayerActivity extends YouTubeBaseActivity implements YouTubePlayer.OnInitializedListener {
-    public static final String API_KEY = "AIzaSyBX-vty3BlKqVl2pHI4fnsBJfNVkkY2nP0";
+    public static final String API_KEY = GC_YOUTUBE_API_KEY;
 
     //http://youtu.be/<VIDEO_ID>
     public static final String VIDEO_ID = "jcRBtTtP9f8";
@@ -20,7 +21,16 @@ public class YouTubePlayerActivity extends YouTubeBaseActivity implements YouTub
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_you_tube_player);
+
+        //取的intent中的bundle物件
+        Bundle bundle =this.getIntent().getExtras();
+
+        String screenSize = bundle.getString("screenSize");
+        if (screenSize!=null && screenSize.equals("small")){
+            setContentView(R.layout.activity_you_tube_player_small);
+        }else{
+            setContentView(R.layout.activity_you_tube_player_full);
+        }
 
         /** Initializing YouTube player view **/
         YouTubePlayerView youTubePlayerView = (YouTubePlayerView) findViewById(R.id.youtube_player);
@@ -45,9 +55,12 @@ public class YouTubePlayerActivity extends YouTubeBaseActivity implements YouTub
             Bundle bundle =this.getIntent().getExtras();
 
             String videoId = bundle.getString("videoId");
+            String screenSize = bundle.getString("screenSize");
+            if (screenSize==null || !screenSize.equals("small")){
+                player.setFullscreen(true);   //全螢幕播放
+            }
             if (videoId!=null && videoId.length()>1) {  //有傳入 YouTube 的影片ID，直接播放
                 //player.cueVideo(VIDEO_ID);    //cueVideo不會自動開始播放，不要用
-                //player.setFullscreen(true);   //全螢幕播放
                 player.loadVideo(videoId);
             }
         }

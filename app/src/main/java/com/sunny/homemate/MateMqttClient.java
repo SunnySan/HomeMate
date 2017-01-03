@@ -19,15 +19,19 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import static com.sunny.homemate.Config.GC_MQTT_BROKER_URL;
+import static com.sunny.homemate.Config.GC_MQTT_M2MIO_DOMAIN;
+import static com.sunny.homemate.Config.GC_MQTT_M2MIO_STUFF;
+
 
 public class MateMqttClient implements MqttCallback {
 
     private MqttClient myClient;
     private MqttConnectOptions connOpt;
 
-    static final String BROKER_URL = "tcp://test.mosquitto.org:1883";
-    static final String M2MIO_DOMAIN = "com/sunny";
-    static final String M2MIO_STUFF = "homemate";
+    static final String BROKER_URL = GC_MQTT_BROKER_URL;
+    static final String M2MIO_DOMAIN = GC_MQTT_M2MIO_DOMAIN;
+    static final String M2MIO_STUFF = GC_MQTT_M2MIO_STUFF;
     static final String M2MIO_THING = "";
     //static final String M2MIO_USERNAME = "<m2m.io username>";
     //static final String M2MIO_PASSWORD_MD5 = "<m2m.io password (MD5 sum of password)>";
@@ -223,6 +227,8 @@ public class MateMqttClient implements MqttCallback {
     @Override
     //public void messageArrived(MqttTopic topic, MqttMessage message) throws Exception {
     public void messageArrived(String topic, MqttMessage message) throws Exception {
+        //這是一個訊息範例: {"action": "video","video_type": "youtube","video_id": "jcRBtTtP9f8","screen_size": "small"}
+
         System.out.println("-------------------------------------------------");
         //System.out.println("| Topic:" + topic.getName());
         System.out.println("| Topic:" + topic);
@@ -240,6 +246,9 @@ public class MateMqttClient implements MqttCallback {
                 System.out.println("video_type= " + sVideoType);
                 String sVideoId = (String) jsonObject.get("video_id");  //影片 id
                 System.out.println("video_id= " + sVideoId);
+                String sScreenSize = (String) jsonObject.get("screen_size");  //螢幕大小，small是給一般影片的全息投影用的
+                if (sScreenSize==null || sScreenSize.length()<1)    sScreenSize = "";
+                System.out.println("screen_size= " + sScreenSize);
                 //啟動播放video的Activity，並將影片資訊帶過去給Activity
                 Intent intent = null;
                 if (sVideoType.equals("youtube")){  //YouTube影片
@@ -248,6 +257,8 @@ public class MateMqttClient implements MqttCallback {
                     intent = new Intent(myParentActivity, PrefActivity.class);
                 }
                 intent.putExtra("videoId", sVideoId);
+                intent.putExtra("screenSize", sScreenSize);
+
                 myParentActivity.startActivity(intent);
             }   //if (sAction.equals("video")){
         } catch (Exception e) {

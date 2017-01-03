@@ -14,4 +14,7 @@
 
     <string name="default_deviceid">Default DeviceID</string>
     <string name="default_deviceid_summary">Set up your DeviceID</string>
+
+    <string name="title_activity_video_player">VideoPlayer</string>
+    <string name="dummy_button">Dummy Button</string>
 </resources>

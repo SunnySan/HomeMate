@@ -3,18 +3,19 @@ package com.sunny.homemate;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -93,6 +94,9 @@ public class MainActivity extends AppCompatActivity {
 
     private MateMqttClient mqttClient = new MateMqttClient();
 
+    private TextToSpeech textToSpeech;
+    private boolean isTTSLoaded = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +123,20 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.exit_button).setOnClickListener(exitApp);
 
         displayDeviceId();  //將DeviceID顯示在螢幕上
+
+        textToSpeech = new TextToSpeech(MainActivity.this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status != TextToSpeech.ERROR) {
+                    //textToSpeech.setLanguage(Locale.CHINESE);
+                    isTTSLoaded = true;
+                    Toast.makeText(MainActivity.this, "TTS initialized", Toast.LENGTH_SHORT).show();
+                    textToSpeech.speak("早安，主人，hava a nice day", TextToSpeech.QUEUE_FLUSH, null);
+                }else{
+                    Toast.makeText(MainActivity.this, "TTS init failed", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     @Override
@@ -138,13 +156,15 @@ public class MainActivity extends AppCompatActivity {
 
         if (!mqttClient.isConnected()){
             mqttClient.setParentActivity(this);
-            if (mqttClient.doConnect("homemate" + myDeviceid)){
+            if (mqttClient.doConnect("homemate" + myDeviceid)){ //用"homemate" + myDeviceid 作為這個設備的 Device Id
                 myDeviceid += ", connected to iot successfully.";
+                if (isTTSLoaded) textToSpeech.speak("我已經連上線了", TextToSpeech.QUEUE_FLUSH, null);
             }else{
                 myDeviceid += ", failed to connect to iot.";
+                if (isTTSLoaded) textToSpeech.speak("糟糕，連不上線", TextToSpeech.QUEUE_FLUSH, null);
             }
         }else{
-            myDeviceid += ", connected to iot successfully.";
+            myDeviceid += ", already connected.";
         }
         tvContent.setText("Your DeviceID is: " + myDeviceid);
         System.out.println("resume, myDeviceid=" + myDeviceid);
