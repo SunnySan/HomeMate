@@ -256,6 +256,8 @@ public class MateMqttClient implements MqttCallback {
                 }else{  //內部影片
                     intent = new Intent(myParentActivity, VideoPlayerActivity.class);
                 }
+
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //避免重複執行
                 intent.putExtra("videoId", sVideoId);
                 intent.putExtra("screenSize", sScreenSize);
 
