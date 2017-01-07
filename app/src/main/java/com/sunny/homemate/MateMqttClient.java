@@ -263,6 +263,19 @@ public class MateMqttClient implements MqttCallback {
 
                 myParentActivity.startActivity(intent);
             }   //if (sAction.equals("video")){
+
+            if (sAction.equals("voicechat")){
+                String sChatText = (String) jsonObject.get("chat_text");  //影片類型
+                System.out.println("chat_text= " + sChatText);
+                //啟動播放voice chat TTS 的Activity，並將chat文字帶過去給Activity
+                Intent intent = null;
+                intent = new Intent(myParentActivity, VoiceChatActivity.class);
+
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //避免重複執行
+                intent.putExtra("chat_text", sChatText);
+
+                myParentActivity.startActivity(intent);
+            }   //if (sAction.equals("voicechat")){
         } catch (Exception e) {
             e.printStackTrace();
         }   //try{

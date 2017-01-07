@@ -1,27 +1,24 @@
 package com.sunny.homemate;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.MediaController;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class MainActivity extends AppCompatActivity {
+public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -50,15 +47,17 @@ public class MainActivity extends AppCompatActivity {
             // Note that some of these constants are new as of API 16 (Jelly Bean)
             // and API 19 (KitKat). It is safe to use them, as they are inlined
             // at compile-time and do nothing on earlier devices.
+            /*
             mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+                    */
         }
     };
-    private View mControlsView;
+    //private View mControlsView;
     private final Runnable mShowPart2Runnable = new Runnable() {
         @Override
         public void run() {
@@ -67,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             if (actionBar != null) {
                 actionBar.show();
             }
-            mControlsView.setVisibility(View.VISIBLE);
+            //mControlsView.setVisibility(View.VISIBLE);
         }
     };
     private boolean mVisible;
@@ -92,8 +91,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private MateMqttClient mqttClient = new MateMqttClient();
-
     private TextToSpeech textToSpeech;
     private boolean isTTSLoaded = false;
 
@@ -101,73 +98,42 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_fullscreen);
+        setContentView(R.layout.activity_video_player);
 
         mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
+        //mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
 
 
         // Set up the user interaction to manually show or hide the system UI.
+        /*
         mContentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 toggle();
             }
         });
+        */
 
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.exit_button).setOnTouchListener(mDelayHideTouchListener);
-        findViewById(R.id.exit_button).setOnClickListener(exitApp);
+        //findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
 
-        textToSpeech = new TextToSpeech(MainActivity.this, new TextToSpeech.OnInitListener() {
+        textToSpeech = new TextToSpeech(VoiceChatActivity.this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
                 if (status != TextToSpeech.ERROR) {
                     //textToSpeech.setLanguage(Locale.CHINESE);
                     isTTSLoaded = true;
-                    Toast.makeText(MainActivity.this, "TTS initialized", Toast.LENGTH_SHORT).show();
-                    textToSpeech.speak("早安，主人，hava a nice day", TextToSpeech.QUEUE_FLUSH, null);
+                    Toast.makeText(VoiceChatActivity.this, "TTS initialized", Toast.LENGTH_SHORT).show();
+                    doVoiceChat();
                 }else{
-                    Toast.makeText(MainActivity.this, "TTS init failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(VoiceChatActivity.this, "TTS init failed", Toast.LENGTH_SHORT).show();
                 }
-                displayDeviceId();  //將DeviceID顯示在螢幕上
             }
         });
 
-    }
-
-    @Override
-    protected void onResume(){
-        super.onResume();
-        displayDeviceId();  //將DeviceID顯示在螢幕上
-    }
-
-    private void displayDeviceId(){
-        //將DeviceID顯示在螢幕上
-        // 建立SharedPreferences物件
-        SharedPreferences sharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(this);
-        // 讀取設定的預設DeviceID
-        String myDeviceid = sharedPreferences.getString("deviceid", "");
-        TextView tvContent = (TextView) findViewById(R.id.tvSubContent);
-        if (isTTSLoaded) System.out.println("TTS loaded"); else System.out.println("TTS not loaded");
-        if (!mqttClient.isConnected()){
-            mqttClient.setParentActivity(this);
-            if (mqttClient.doConnect("homemate" + myDeviceid)){ //用"homemate" + myDeviceid 作為這個設備的 Device Id
-                myDeviceid += ", connected to iot successfully.";
-                if (isTTSLoaded) textToSpeech.speak("我已經連上線了", TextToSpeech.QUEUE_FLUSH, null);
-            }else{
-                myDeviceid += ", failed to connect to iot.";
-                if (isTTSLoaded) textToSpeech.speak("糟糕，連不上線", TextToSpeech.QUEUE_FLUSH, null);
-            }
-        }else{
-            myDeviceid += ", already connected.";
-        }
-        tvContent.setText("Your DeviceID is: " + myDeviceid);
-        System.out.println("resume, myDeviceid=" + myDeviceid);
     }
 
     @Override
@@ -194,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.hide();
         }
-        mControlsView.setVisibility(View.GONE);
+        //mControlsView.setVisibility(View.GONE);
         mVisible = false;
 
         // Schedule a runnable to remove the status and navigation bar after a delay
@@ -223,45 +189,55 @@ public class MainActivity extends AppCompatActivity {
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
 
-    //結束且離開
-    View.OnClickListener exitApp = new View.OnClickListener() {
-        public void onClick(View v) {
-            if (mqttClient.isConnected()) mqttClient.doDisconnect();
-            System.exit(0);
+    private void doVoiceChat(){
+        //取的intent中的bundle物件
+        Bundle bundle =this.getIntent().getExtras();
+        String chatText = bundle.getString("chat_text");
+        if (chatText!=null && chatText.length()>1 && isTTSLoaded) {  //有傳入聊天文字，由TTS播放
+            textToSpeech.speak(chatText, TextToSpeech.QUEUE_FLUSH, null);
         }
-    };
+    }
+
+    private void playVideo(){
+        VideoView videoView = (VideoView) this.findViewById(R.id.videoView);
+
+        videoView.setOnCompletionListener(this);    //播放完畢後的處理
+
+        //全螢幕播放
+        videoView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+/*
+        DisplayMetrics metrics = new DisplayMetrics(); getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        android.widget.LinearLayout.LayoutParams params = (android.widget.LinearLayout.LayoutParams) videoView.getLayoutParams();
+        params.width =  metrics.widthPixels;
+        params.height = metrics.heightPixels;
+        params.leftMargin = 0;
+        videoView.setLayoutParams(params);
+*/
+        MediaController mc = new MediaController(this);
+        videoView.setMediaController(mc);
+        videoView.setVideoURI(Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.miku2));
+
+        videoView.requestFocus();
+        videoView.start();
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {  //播放完後就結束 Activity
+        this.finish();
+    }
 
     @Override
     protected void onDestroy()
     {
         super.onDestroy();
-        if (mqttClient.isConnected()) mqttClient.doDisconnect();
         if (isTTSLoaded) textToSpeech.shutdown();
     }
 
-    // 載入選單資源 Menu
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.main_menu, menu);
-
-        // 建立SharedPreferences物件
-        SharedPreferences sharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(this);
-        // 讀取設定的預設DeviceID
-        String myDeviceid = sharedPreferences.getString("deviceid", "");
-        if (myDeviceid.length()<1) {
-            System.out.println("No DeviceID, ask user to set DeviceID");
-            clickPreferences(menu.getItem(0));
-        }
-        //System.out.println("myDeviceid=" + myDeviceid);
-        return true;
-    }
-
-    // 設定預設值 DeviceID
-    public void clickPreferences(MenuItem item) {
-        // 啟動設定元件
-        startActivity(new Intent(this, PrefActivity.class));
-    }
-
 }
+

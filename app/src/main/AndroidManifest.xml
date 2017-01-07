@@ -40,6 +40,12 @@
             android:label="@string/title_activity_video_player"
             android:screenOrientation="landscape"
             android:theme="@style/FullscreenTheme"></activity>
+        <activity
+            android:name=".VoiceChatActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_voice_chat"
+            android:screenOrientation="landscape"
+            android:theme="@style/FullscreenTheme"></activity>
     </application>
 
 </manifest>

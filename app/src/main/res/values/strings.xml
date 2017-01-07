@@ -16,5 +16,6 @@
     <string name="default_deviceid_summary">Set up your DeviceID</string>
 
     <string name="title_activity_video_player">VideoPlayer</string>
+    <string name="title_activity_voice_chat">Voice Chat</string>
     <string name="dummy_button">Dummy Button</string>
 </resources>
