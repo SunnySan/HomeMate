@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
@@ -14,11 +15,13 @@ import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import java.util.HashMap;
+
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
+public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -93,6 +96,7 @@ public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.
 
     private TextToSpeech textToSpeech;
     private boolean isTTSLoaded = false;
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +124,14 @@ public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.
         // while interacting with the UI.
         //findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
 
+        VideoView videoView = (VideoView) this.findViewById(R.id.videoView);
+        videoView.setOnPreparedListener (new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.setLooping(true);
+            }
+        });
+
         textToSpeech = new TextToSpeech(VoiceChatActivity.this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -131,6 +143,25 @@ public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.
                 }else{
                     Toast.makeText(VoiceChatActivity.this, "TTS init failed", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onDone(String utteranceId){
+                System.out.println(" TTS onDone");
+                VideoView videoView = (VideoView) VoiceChatActivity.this.findViewById(R.id.videoView);
+                if (videoView.isPlaying()){videoView.pause();}
+            }
+
+            @Override
+            public void onError(String utteranceId){
+                System.out.println(" TTS onError");
+            }
+
+            @Override
+            public void onStart(String utteranceId){
+                System.out.println(" TTS onStart");
             }
         });
 
@@ -193,15 +224,19 @@ public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.
         //取的intent中的bundle物件
         Bundle bundle =this.getIntent().getExtras();
         String chatText = bundle.getString("chat_text");
+        VideoView videoView = (VideoView) this.findViewById(R.id.videoView);
         if (chatText!=null && chatText.length()>1 && isTTSLoaded) {  //有傳入聊天文字，由TTS播放
-            textToSpeech.speak(chatText, TextToSpeech.QUEUE_FLUSH, null);
+            playVideo();
+            HashMap<String, String> param = new HashMap<>();
+            param.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "homematevoicechat");
+            textToSpeech.speak(chatText, TextToSpeech.QUEUE_FLUSH, param);
         }
     }
 
     private void playVideo(){
         VideoView videoView = (VideoView) this.findViewById(R.id.videoView);
 
-        videoView.setOnCompletionListener(this);    //播放完畢後的處理
+        //videoView.setOnCompletionListener(this);    //播放完畢後的處理
 
         //全螢幕播放
         videoView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
@@ -223,13 +258,20 @@ public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.
         videoView.setMediaController(mc);
         videoView.setVideoURI(Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.miku2));
 
+        videoView.setOnPreparedListener(this);
         videoView.requestFocus();
         videoView.start();
     }
 
     @Override
+    public void onPrepared(MediaPlayer mediaPlayer) {
+        this.mediaPlayer = mediaPlayer;
+        this.mediaPlayer.setVolume(0, 0);   //不要播放video中的聲音，只用TTS唸文字
+    }
+
+    @Override
     public void onCompletion(MediaPlayer mp) {  //播放完後就結束 Activity
-        this.finish();
+        //this.finish();
     }
 
     @Override
