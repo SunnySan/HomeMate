@@ -254,6 +254,7 @@ public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.
         params.leftMargin = 0;
         videoView.setLayoutParams(params);
 */
+        
         MediaController mc = new MediaController(this);
         videoView.setMediaController(mc);
         videoView.setVideoURI(Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.speaking));
