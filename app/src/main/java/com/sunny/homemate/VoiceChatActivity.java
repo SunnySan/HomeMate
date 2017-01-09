@@ -21,7 +21,7 @@ import java.util.HashMap;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -124,14 +124,6 @@ public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.
         // while interacting with the UI.
         //findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
 
-        VideoView videoView = (VideoView) this.findViewById(R.id.videoView);
-        videoView.setOnPreparedListener (new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mp.setLooping(true);
-            }
-        });
-
         textToSpeech = new TextToSpeech(VoiceChatActivity.this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -224,7 +216,6 @@ public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.
         //取的intent中的bundle物件
         Bundle bundle =this.getIntent().getExtras();
         String chatText = bundle.getString("chat_text");
-        VideoView videoView = (VideoView) this.findViewById(R.id.videoView);
         if (chatText!=null && chatText.length()>1 && isTTSLoaded) {  //有傳入聊天文字，由TTS播放
             playVideo();
             HashMap<String, String> param = new HashMap<>();
@@ -259,15 +250,16 @@ public class VoiceChatActivity extends AppCompatActivity implements MediaPlayer.
         videoView.setMediaController(mc);
         videoView.setVideoURI(Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.speaking));
 
-        videoView.setOnPreparedListener(this);
+        videoView.setOnPreparedListener (new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.setLooping(true);
+                mp.setVolume(0, 0); //不要播放video中的聲音，只用TTS唸文字
+            }
+        });
+
         videoView.requestFocus();
         videoView.start();
-    }
-
-    @Override
-    public void onPrepared(MediaPlayer mediaPlayer) {
-        this.mediaPlayer = mediaPlayer;
-        this.mediaPlayer.setVolume(0, 0);   //不要播放video中的聲音，只用TTS唸文字
     }
 
     @Override
