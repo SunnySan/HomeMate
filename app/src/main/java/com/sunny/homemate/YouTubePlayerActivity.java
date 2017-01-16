@@ -110,7 +110,7 @@ public class YouTubePlayerActivity extends YouTubeBaseActivity implements YouTub
 
     private void playVideo(YouTubePlayer player){
         //if (player!=null && player.isPlaying()) player.release();
-        //取的intent中的bundle物件
+        //取得intent中的bundle物件
         Bundle bundle =this.getIntent().getExtras();
 
         String videoId = bundle.getString("videoId");

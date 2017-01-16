@@ -3,10 +3,13 @@ package com.sunny.homemate;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -107,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
 
+        checkMyPermission();
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
@@ -136,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
                 displayDeviceId();  //將DeviceID顯示在螢幕上
             }
         });
+        //startActivity(new Intent(this, org.appspot.apprtc.ConnectActivity.class));  //WebRTC的畫面
 
     }
 
@@ -264,4 +269,57 @@ public class MainActivity extends AppCompatActivity {
         startActivity(new Intent(this, PrefActivity.class));
     }
 
+    //檢查所需權限
+    private void checkMyPermission(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED){
+                if (shouldShowRequestPermissionRationale(android.Manifest.permission.CAMERA)){
+                    Toast.makeText(this,"No Permission to use the Camera services", Toast.LENGTH_SHORT).show();
+                }
+                requestPermissions(new String[] {android.Manifest.permission.CAMERA},1);
+            }
+
+            if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.CHANGE_NETWORK_STATE)
+                    != PackageManager.PERMISSION_GRANTED){
+                if (shouldShowRequestPermissionRationale(android.Manifest.permission.CHANGE_NETWORK_STATE)){
+                    Toast.makeText(this,"No Permission to use the Camera services", Toast.LENGTH_SHORT).show();
+                }
+                requestPermissions(new String[] {android.Manifest.permission.CHANGE_NETWORK_STATE},1);
+            }
+
+            if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED){
+                if (shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO)){
+                    Toast.makeText(this,"No Permission to use the Camera services", Toast.LENGTH_SHORT).show();
+                }
+                requestPermissions(new String[] {android.Manifest.permission.RECORD_AUDIO},1);
+            }
+
+            if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.MODIFY_AUDIO_SETTINGS)
+                    != PackageManager.PERMISSION_GRANTED){
+                if (shouldShowRequestPermissionRationale(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)){
+                    Toast.makeText(this,"No Permission to use the Camera services", Toast.LENGTH_SHORT).show();
+                }
+                requestPermissions(new String[] {android.Manifest.permission.MODIFY_AUDIO_SETTINGS},1);
+            }
+
+            if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED){
+                if (shouldShowRequestPermissionRationale(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                    Toast.makeText(this,"No Permission to use the Camera services", Toast.LENGTH_SHORT).show();
+                }
+                requestPermissions(new String[] {android.Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+            }
+
+            if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH)
+                    != PackageManager.PERMISSION_GRANTED){
+                if (shouldShowRequestPermissionRationale(android.Manifest.permission.BLUETOOTH)){
+                    Toast.makeText(this,"No Permission to use the Camera services", Toast.LENGTH_SHORT).show();
+                }
+                requestPermissions(new String[] {android.Manifest.permission.BLUETOOTH},1);
+            }
+        }
+
+    }
 }

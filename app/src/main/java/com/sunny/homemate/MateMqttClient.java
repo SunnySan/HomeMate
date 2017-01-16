@@ -276,6 +276,19 @@ public class MateMqttClient implements MqttCallback {
 
                 myParentActivity.startActivity(intent);
             }   //if (sAction.equals("voicechat")){
+
+            if (sAction.equals("webrtc")){
+                String sRoomId = (String) jsonObject.get("room_id");  //Room ID
+                System.out.println("room_id= " + sRoomId);
+                //啟動WebRTC的Activity，並將room id文字帶過去給Activity
+                Intent intent = null;
+                intent = new Intent(myParentActivity, org.appspot.apprtc.ConnectActivity.class);    //WebRTC的畫面
+
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //避免重複執行
+                intent.putExtra("roomId", sRoomId);
+
+                myParentActivity.startActivity(intent);
+            }   //if (sAction.equals("voicechat")){
         } catch (Exception e) {
             e.printStackTrace();
         }   //try{
